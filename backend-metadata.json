@@ -1,0 +1,6 @@
+{
+  "name": "cpu-llama-cpp",
+  "alias": "llama-cpp",
+  "version": "v5.0.1",
+  "uri": "localai/localai-backends:v5.0.1-cpu-llama-cpp@sha256:9f9f2ad2aa8f3c517065bb5668c7f83577d52f3638f39daead60e8093a3cbc31"
+}

@@ -44,11 +44,24 @@ export GOMEMLIMIT="${GOMEMLIMIT:-96MiB}"
 export GOGC="${GOGC:-50}"
 
 # Seed the default model once. Deleting it later from the UI keeps it deleted.
+# The marker records the checksum of the config we wrote, so a template update
+# can refresh that config as long as the deployer hasn't edited it.
 marker="$LOCALAI_MODELS_PATH/.railway-default-model"
+shipped=/etc/railway-localai/default-model.yaml
+target="$LOCALAI_MODELS_PATH/smollm2-360m-instruct.yaml"
+shipped_sum=$(sha256sum "$shipped" | cut -d' ' -f1)
 if [ "${LOCALAI_SEED_DEFAULT_MODEL:-true}" = "true" ] && [ ! -e "$marker" ]; then
-	cp /etc/railway-localai/default-model.yaml "$LOCALAI_MODELS_PATH/smollm2-360m-instruct.yaml"
-	date -u +%FT%TZ > "$marker"
+	cp "$shipped" "$target"
+	echo "$shipped_sum" > "$marker"
 	echo "railway-start: seeded the default model smollm2-360m-instruct (downloads about 270 MB on this first boot)"
+elif [ -e "$marker" ] && [ -e "$target" ]; then
+	current_sum=$(sha256sum "$target" | cut -d' ' -f1)
+	recorded_sum=$(head -c 64 "$marker")
+	if [ "$current_sum" != "$shipped_sum" ] && [ "$current_sum" = "$recorded_sum" ]; then
+		cp "$shipped" "$target"
+		echo "$shipped_sum" > "$marker"
+		echo "railway-start: updated the unedited default model config to this template version"
+	fi
 fi
 
 echo "railway-start: threads=$LOCALAI_THREADS GOMAXPROCS=$GOMAXPROCS address=$LOCALAI_ADDRESS home=$home"

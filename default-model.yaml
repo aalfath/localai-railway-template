@@ -4,15 +4,19 @@
 # Models page once your service has more RAM.
 name: smollm2-360m-instruct
 backend: llama-cpp
-context_size: 2048
+context_size: 1024
+mmap: true
 parameters:
   model: SmolLM2-360M-Instruct-Q4_K_M.gguf
   temperature: 0.3
+  batch: 128
   top_p: 0.9
 template:
   use_tokenizer_template: true
 options:
   - use_jinja:true
+  # No prompt cache in host RAM (llama.cpp keeps up to 8 GB by default).
+  - cache_ram:0
 known_usecases:
   - chat
   - completion

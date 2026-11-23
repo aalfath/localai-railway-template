@@ -38,6 +38,10 @@ host_cpus=$(nproc 2>/dev/null || echo "$cpus")
 [ "$cpus" -le "$host_cpus" ] || cpus="$host_cpus"
 export LOCALAI_THREADS="${LOCALAI_THREADS:-$cpus}"
 export GOMAXPROCS="${GOMAXPROCS:-$(( cpus < 2 ? 2 : cpus ))}"
+# Keep the Go server small so the model gets the memory: a soft heap limit
+# (the llama.cpp backend is C++ and ignores it).
+export GOMEMLIMIT="${GOMEMLIMIT:-96MiB}"
+export GOGC="${GOGC:-50}"
 
 # Seed the default model once. Deleting it later from the UI keeps it deleted.
 marker="$LOCALAI_MODELS_PATH/.railway-default-model"

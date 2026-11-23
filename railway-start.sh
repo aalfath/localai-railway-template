@@ -43,6 +43,13 @@ export GOMAXPROCS="${GOMAXPROCS:-$(( cpus < 2 ? 2 : cpus ))}"
 export GOMEMLIMIT="${GOMEMLIMIT:-96MiB}"
 export GOGC="${GOGC:-50}"
 
+# On small services keep only one model in memory at a time (LocalAI unloads
+# the least recently used one first). Bigger services keep upstream's default.
+mem_limit=$(cat /sys/fs/cgroup/memory.max 2>/dev/null || echo max)
+if [ "$mem_limit" != "max" ] && [ "$mem_limit" -lt 2147483648 ]; then
+	export LOCALAI_MAX_ACTIVE_BACKENDS="${LOCALAI_MAX_ACTIVE_BACKENDS:-1}"
+fi
+
 # Seed the default model once. Deleting it later from the UI keeps it deleted.
 # The marker records the checksum of the config we wrote, so a template update
 # can refresh that config as long as the deployer hasn't edited it.
@@ -64,5 +71,8 @@ elif [ -e "$marker" ] && [ -e "$target" ]; then
 	fi
 fi
 
-echo "railway-start: threads=$LOCALAI_THREADS GOMAXPROCS=$GOMAXPROCS address=$LOCALAI_ADDRESS home=$home"
+# Files written here as root must stay editable by LocalAI's own user.
+chown "${LOCALAI_UID:-10001}:${LOCALAI_GID:-10001}" "$LOCALAI_MODELS_PATH"/smollm2-360m-instruct.yaml "$marker" 2>/dev/null || true
+
+echo "railway-start: threads=$LOCALAI_THREADS GOMAXPROCS=$GOMAXPROCS max_active_backends=${LOCALAI_MAX_ACTIVE_BACKENDS:-0} address=$LOCALAI_ADDRESS home=$home"
 exec /entrypoint.sh "$@"

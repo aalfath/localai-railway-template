@@ -38,7 +38,7 @@ curl https://YOUR-DOMAIN/v1/chat/completions \
 
 OpenAI-compatible clients use base URL `https://YOUR-DOMAIN/v1` and the same key. Other Railway services can use `http://${{LocalAI.RAILWAY_PRIVATE_DOMAIN}}:8080/v1`.
 
-**RAM.** The default model chats within a 0.5 GB service (tested at 1 vCPU, about 235 MB in use). Real models need more: about 1.5 GB for a 1B model, 3 GB for a 3B model and 6 GB for a 7–8B model at 4-bit quantization. Raise the service's memory before installing them from the Models page. Speed depends on vCPUs; set `LOCALAI_THREADS` if you want a fixed thread count.
+**RAM.** The default model chats within a 0.5 GB service (tested at 1 vCPU, about 255 MB in use). Real models need more: about 1.5 GB for a 1B model, 3 GB for a 3B model and 6 GB for a 7–8B model at 4-bit quantization. Raise the service's memory before installing them from the Models page. Speed depends on vCPUs; set `LOCALAI_THREADS` if you want a fixed thread count.
 
 **Optional settings.** `LOCALAI_SEED_DEFAULT_MODEL=false` skips the default model on a fresh volume. Multi-user accounts (`LOCALAI_AUTH=true`), OAuth/OIDC and other settings are described in LocalAI's documentation. Docker-based sandboxes for agents need privileged mode and are not available on Railway.
 
